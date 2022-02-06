@@ -52,7 +52,14 @@ function App(){
     const [wordEtymology, setWordEtymology]   = useState("");
     const [suggestedWords, setSuggestedWords] = useState([]);
 
+    const resetResults = ()=>{
+        setWordDefinition("");
+        setWordEtymology("");
+        setSuggestedWords([]);
+    }
+
     const handleGetDefinition = () => {
+        resetResults();
         getDefinition(wordInput)
             .then(res=>{
                 let parsedResponse = parseDefinitionResponse(res);
@@ -84,7 +91,7 @@ function App(){
                         <div>
                             <p>Suggested Words</p>
                             <ul>
-                                {suggestedWords.map((word=>(<li>word</li>)))}
+                                {suggestedWords.map(((word,i)=>(<li key={`word_${i}`}>{word}</li>)))}
                             </ul>
                         </div>
                         :
