@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import logo from './logo.svg';
 import './App.css';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+// import CardActions from '@mui/material/CardActions';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
 
 
 
@@ -78,33 +81,42 @@ function App(){
     return (
         <div className="App">
             <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo" />
-                <Box>
-                    <TextField 
-                        id="standard-basic"
-                        label="Standard"
-                        variant="standard" 
-                        onChange={e=>setWordInput(e.target.value)}
-                    />
-                    <Button variant="outlined" onClick={handleGetDefinition}>Search</Button>
-                    {suggestedWords.length > 0 ?
-                        <div>
-                            <p>Suggested Words</p>
-                            <ul>
-                                {suggestedWords.map(((word,i)=>(<li key={`word_${i}`}>{word}</li>)))}
-                            </ul>
-                        </div>
-                        :
-                        <div>
-                            <p>Definition</p>
-                            <hr />
-                            <i>{wordDefinition}</i>
-                            <p>Etymology</p>
-                            <hr />
-                            <i>{wordEtymology}</i>
-                        </div>
-                    }
-                </Box>
+            {/* INPUT */}
+            <TextField 
+                id="standard-basic"
+                label="Standard"
+                variant="standard" 
+                onChange={e=>setWordInput(e.target.value)}
+            />
+            <Button variant="outlined" onClick={handleGetDefinition}>Search</Button>
+
+            {/* RESULTS */}
+            {suggestedWords.length > 0 ?
+                <div>
+                    <p>Suggested Words</p>
+                    <ul>
+                        {suggestedWords.map(((word,i)=>(<li key={`word_${i}`}>{word}</li>)))}
+                    </ul>
+                </div>
+                :
+                <Card sx={{ minWidth: 275 }}>
+                    <CardContent>
+                        <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                            Definition
+                        </Typography>
+                        <Typography variant="body2">
+                            {wordDefinition}
+                        </Typography>
+                        <hr />
+                        <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                        Etymology
+                        </Typography>
+                        <Typography variant="body2">
+                            {wordEtymology}
+                        </Typography>
+                    </CardContent>
+                </Card>
+            }
             </header>
         </div>
         );
