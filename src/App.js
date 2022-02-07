@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import './App.css';
-import Box from '@mui/material/Box';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-// import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import Typography from '@mui/material/Typography';
-
+import {
+    Box,
+    TextField,
+    Button,
+    Card,
+    CardHeader,
+    CardActions,
+    CardContent,
+    Typography,
+    Container,
+    IconButton,
+    Stack,
+} from '@mui/material';
+import WifiProtectedSetupIcon from '@mui/icons-material/WifiProtectedSetup';
 
 
 function getDefinition(word){
@@ -49,18 +55,67 @@ function parseDefinitionResponse(res){
     return result;
 }
 
+function FlashCard({word, wordType, definitions, etymologies}){
+    definitions = definitions || [];
+    etymologies = etymologies || [];
+
+    const fixWordCase = word=>word.toLowerCase().replace(/\w\S*/g, w=>(w.replace(/^\w/, c=>c.toUpperCase())))
+
+    return (
+        <Card>
+            <CardContent>
+            <Stack direction="row" justifyContent="space-between">
+                <Typography variant="h2">
+                    {fixWordCase(word)}
+                </Typography>
+                <IconButton aria-label="settings">
+                    <WifiProtectedSetupIcon />
+                </IconButton>
+            </Stack>
+                
+                <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                    {wordType}
+                </Typography>
+                <ol>
+                    {definitions.map((d,i)=>(
+                        <li key={`d_${i}`}>
+                            <Typography variant="body1">{d}</Typography>
+                        </li>
+                    ))}
+                </ol>
+                <hr />
+                <ol>
+                    {etymologies.map((e,i)=>(
+                        <li key={`e_${i}`}>
+                            <Typography variant="caption">{e}</Typography>
+                        </li>
+                    ))}
+                </ol>
+            </CardContent>
+        </Card>
+    )
+}
+
 function App(){
-    const [wordInput, setWordInput]           = useState("");
-    const [wordDefinition, setWordDefinition] = useState("");
-    const [wordEtymology, setWordEtymology]   = useState("");
-    const [suggestedWords, setSuggestedWords] = useState([]);
+    const [wordInput, setWordInput]             = useState("");
+    const [wordDefinitions, setWordDefinitions] = useState("");
+    const [wordEtymologies, setWordEtymologies] = useState("");
+    const [suggestedWords, setSuggestedWords]   = useState([]);
+    const [showCard, setShowCard]               = useState(false);
 
     const resetResults = ()=>{
-        setWordDefinition("");
-        setWordEtymology("");
+        setWordDefinitions("");
+        setWordEtymologies("");
         setSuggestedWords([]);
+        setShowCard(false);
     }
+    const handleWordInput = e => {
+        if(showCard){
+            setShowCard(false);
+        }
+        setWordInput(e.target.value);
 
+    }
     const handleGetDefinition = () => {
         resetResults();
         getDefinition(wordInput)
@@ -69,8 +124,9 @@ function App(){
                 if(parsedResponse.suggestedWords.length > 0){
                     setSuggestedWords(parsedResponse.suggestedWords)
                 }else{
-                    setWordDefinition(parsedResponse.definitions.join('\n'));
-                    setWordEtymology(parsedResponse.etymologies.join('\n'));
+                    setWordDefinitions(parsedResponse.definitions);
+                    setWordEtymologies(parsedResponse.etymologies);
+                    setShowCard(true);
                 }
             })
             .catch(e=>{
@@ -86,37 +142,29 @@ function App(){
                 id="standard-basic"
                 label="Standard"
                 variant="standard" 
-                onChange={e=>setWordInput(e.target.value)}
+                onChange={handleWordInput}
             />
             <Button variant="outlined" onClick={handleGetDefinition}>Search</Button>
 
             {/* RESULTS */}
-            {suggestedWords.length > 0 ?
+            <Container maxWidth="sm">
+            {showCard &&
+                <FlashCard 
+                    word={wordInput}
+                    wordType='Adjective'
+                    definitions={wordDefinitions}
+                    etymologies={wordEtymologies}
+                />
+            }
+            {suggestedWords.length > 0 && !showCard &&
                 <div>
                     <p>Suggested Words</p>
                     <ul>
                         {suggestedWords.map(((word,i)=>(<li key={`word_${i}`}>{word}</li>)))}
                     </ul>
                 </div>
-                :
-                <Card sx={{ minWidth: 275 }}>
-                    <CardContent>
-                        <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                            Definition
-                        </Typography>
-                        <Typography variant="body2">
-                            {wordDefinition}
-                        </Typography>
-                        <hr />
-                        <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                        Etymology
-                        </Typography>
-                        <Typography variant="body2">
-                            {wordEtymology}
-                        </Typography>
-                    </CardContent>
-                </Card>
             }
+            </Container>
             </header>
         </div>
         );
